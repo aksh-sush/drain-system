@@ -1,49 +1,65 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { MapPin, AlertTriangle } from "lucide-react";
-import dynamic from "next/dynamic"; // ✅ Next.js dynamic import
+import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
-import * as L from "leaflet";
-import "leaflet-kml"; // ✅ Support for KML files
 import { kml as toGeoJSON } from "@tmcw/togeojson";
-
-// Extend Leaflet's type definition to include KML
-declare module "leaflet" {
-  export function KML(kml: Document): LayerGroup;
-}
 
 // ✅ Lazy load Leaflet components to prevent SSR issues
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
-import { useMap } from "react-leaflet";
+const useMap = dynamic(() => import("react-leaflet").then((mod) => mod.useMap), { ssr: false });
 
 const ChennaiCoordinates = [13.0827, 80.2707]; // Center of Chennai
-const kmlFilePath = "/kml/chennai_basin_drainage_macro_drains.kml"; // ✅ Ensure this is placed in /public/kml/
 
-const KMLLayer = ({url="chennai_basin_drainage_macro_drains.kml"}) => {
+const KMLLayer = ({ url }) => {
   const map = useMap();
 
   useEffect(() => {
-    fetch(url)
-      .then((res) => res.text())
-      .then((kmlText) => {
-        const parser = new DOMParser();
-        const kml = parser.parseFromString(kmlText, "text/xml");
-  
-        // Convert KML to GeoJSON
-        const geoJson = toGeoJSON(kml);
-  
-        // Create a GeoJSON Layer
-        const kmlLayer = L.geoJSON(geoJson);
-  
-        // Add to map
-        map.addLayer(kmlLayer);
-      })
-      .catch((error) => console.error("Error loading KML:", error));
+    if (typeof window === "undefined") return; // Ensure it's running on the client
+
+    import("leaflet").then((L) => {
+      fetch(url)
+        .then((res) => res.text())
+        .then((kmlText) => {
+          const parser = new DOMParser();
+          const kml = parser.parseFromString(kmlText, "text/xml");
+          const geoJson = toGeoJSON(kml);
+
+          if (!geoJson || !geoJson.features || geoJson.features.length === 0) {
+            console.error("No valid features found in KML");
+            return;
+          }
+
+          const kmlLayer = L.geoJSON(geoJson, {
+            style: { color: "blue", weight: 2 },
+          }).addTo(map);
+
+          const bounds = kmlLayer.getBounds();
+          if (bounds.isValid()) {
+            map.fitBounds(bounds);
+          } else {
+            console.warn("KML bounds invalid, using default center.");
+            map.setView(ChennaiCoordinates, 12);
+          }
+        })
+        .catch((error) => console.error("Error loading KML:", error));
+    });
+
+    return () => {
+      // Cleanup function to remove KML Layer
+      if (map) {
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Layer) {
+            map.removeLayer(layer);
+          }
+        });
+      }
+    };
   }, [url, map]);
-  
 
   return null;
 };
@@ -57,25 +73,15 @@ const SmartDrainDashboard = () => {
     Bangalore: { drainCovers: 220, alertsToday: 15, riskZones: 7, avgBlockageRisk: "High" },
   };
 
-<<<<<<< Updated upstream
-=======
   const alerts = [
     { location: "Bandra Drain", risk: "High", time: "2h ago" },
     { location: "Andheri Drainage", risk: "Medium", time: "4h ago" },
     { location: "Powai Lake Outlet", risk: "Low", time: "6h ago" },
   ];
->>>>>>> Stashed changes
 
   const currentCityData = cityData[selectedCity];
-  
 
-  interface Alert {
-    location: string;
-    risk: "High" | "Medium" | "Low";
-    time: string;
-  }
-
-  function getRiskColorClasses(risk: Alert["risk"]): string {
+  function getRiskColorClasses(risk) {
     switch (risk) {
       case "High":
         return "bg-red-200 text-red-800";
@@ -149,9 +155,9 @@ const SmartDrainDashboard = () => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
-              
+
               {/* KML Overlay for Drainage System */}
-              <KMLLayer url={kmlFilePath} />
+              <KMLLayer url="/kml/chennai_basin_drainage_macro_drains.kml" />
 
               {/* Chennai Marker */}
               <Marker position={ChennaiCoordinates}>
@@ -160,26 +166,7 @@ const SmartDrainDashboard = () => {
             </MapContainer>
           </div>
 
-          {/* Recent Alerts Column */}
-          <div className="bg-white p-6 rounded-lg shadow mt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Recent Alerts</h2>
-              <AlertTriangle className="h-6 w-6 text-purple-500" />
-            </div>
-            <div className="space-y-3">
-              {alerts.map((alert, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
-                  <div>
-                    <p className="font-medium">{alert.location}</p>
-                    <p className="text-sm text-gray-500">{alert.time}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs ${getRiskColorClasses(alert.risk)}`}>
-                    {alert.risk}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>
