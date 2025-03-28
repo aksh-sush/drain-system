@@ -57,14 +57,6 @@ const SmartDrainDashboard = () => {
     Bangalore: { drainCovers: 220, alertsToday: 15, riskZones: 7, avgBlockageRisk: "High" },
   };
 
-<<<<<<< Updated upstream
-=======
-  const alerts = [
-    { location: "Bandra Drain", risk: "High", time: "2h ago" },
-    { location: "Andheri Drainage", risk: "Medium", time: "4h ago" },
-    { location: "Powai Lake Outlet", risk: "Low", time: "6h ago" },
-  ];
->>>>>>> Stashed changes
 
   const currentCityData = cityData[selectedCity];
   
@@ -167,17 +159,7 @@ const SmartDrainDashboard = () => {
               <AlertTriangle className="h-6 w-6 text-purple-500" />
             </div>
             <div className="space-y-3">
-              {alerts.map((alert, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
-                  <div>
-                    <p className="font-medium">{alert.location}</p>
-                    <p className="text-sm text-gray-500">{alert.time}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs ${getRiskColorClasses(alert.risk)}`}>
-                    {alert.risk}
-                  </span>
-                </div>
-              ))}
+          
             </div>
           </div>
         </div>
