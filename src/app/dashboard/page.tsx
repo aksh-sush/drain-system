@@ -25,7 +25,9 @@ const SmartDrainDashboard = () => {
     }
   };
 
+
   const currentCityData = cityData[selectedCity];
+  
 
   return (
     <div className="min-h-screen text-black bg-gray-50 p-6">
