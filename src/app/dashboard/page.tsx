@@ -11,6 +11,7 @@ const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLa
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
 // City coordinates
+
 const CityCoordinates: Record<City, [number, number]> = {
   Chennai: [13.078819, 80.252215],
   Delhi: [28.6139, 77.2090],
@@ -48,7 +49,41 @@ const reddotIcon = L.divIcon({
 type City = "Chennai" | "Delhi" | "Bangalore";
 
 const SmartDrainDashboard: React.FC = () => {
+  const [pressure, setPressure] = useState("0");
+const [gasLevel, setGasLevel] = useState("0");
+const [ulr, setult] = useState("0");
   const [selectedCity, setSelectedCity] = useState<City>("Chennai");
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      // Simulate random values for each reading
+      const newPressure = (90 + Math.random() * 20).toFixed(2); // 90-110 kPa
+      const newGas = (200 + Math.random() * 300).toFixed(0);     // 200-500 ppm
+    //  const ultl = (20 + Math.random() * (500 - 20)).toFixed(0); // 20–500 cm
+
+      //setult(ultl);
+      setPressure(newPressure);
+      setGasLevel(newGas);
+    }, 3000); // update every 3 seconds
+  
+    
+    return () => clearInterval(interval); // cleanup
+  }, []);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      // Simulate random values for each reading
+     // const newPressure = (90 + Math.random() * 20).toFixed(2); // 90-110 kPa
+     // const newGas = (200 + Math.random() * 300).toFixed(0);     // 200-500 ppm
+      const ultl = (20 + Math.random() * (500 - 20)).toFixed(0); // 20–500 cm
+
+      setult(ultl);
+     // setPressure(newPressure);
+      //setGasLevel(newGas);
+    }, 6000); // update every 3 seconds
+  
+    
+    return () => clearInterval(interval); // cleanup
+  }, []);
 
   const cityData: Record<City, CityData> = {
     Chennai: { drainCovers: 13, alertsToday: 2, riskZones: 2, avgBlockageRisk: "Medium" },
@@ -184,7 +219,15 @@ const SmartDrainDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+        <div className="col-span-1 bg-white rounded-lg p-6 shadow-md">
+      <h2 className="text-lg font-semibold mb-2">Sensor Readings</h2>
+      <div className="text-sm text-gray-700 mb-1">Pressure: <span className="font-medium">{pressure} kPa</span></div>
+      <div className="text-sm text-gray-700">Gas Sensor: <span className="font-medium">{gasLevel} ppm</span></div>
+      <div className="text-sm text-gray-700">Water Level: <span className="font-medium">{ulr} cm</span></div>
+   
+    </div>
       </div>
+     
     </div>
   );
 };
