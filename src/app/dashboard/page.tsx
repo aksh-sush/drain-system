@@ -1,19 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { MapPin, AlertTriangle  } from "lucide-react";
+import { MapPin, AlertTriangle } from "lucide-react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
-
+import L from "leaflet"; 
 // Lazy load Leaflet components to ,prevent SSR issues
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
-
 // City coordinates
 const CityCoordinates: Record<City, [number, number]> = {
-  Chennai: [13.0827, 80.2707],
+  Chennai: [13.078819, 80.252215],
   Delhi: [28.6139, 77.2090],
   Bangalore: [12.9716, 77.5946]
 };
@@ -24,28 +23,43 @@ interface CityData {
   riskZones: number;
   avgBlockageRisk: "High" | "Medium" | "Low";
 }
-
+const polyline = [
+  [51.505, -0.09],
+  [51.51, -0.1],
+  [51.51, -0.12],
+]
 interface Alert {
   location: string;
   risk: "High" | "Medium" | "Low";
   time: string;
 }
-
+const dotIcon = L.divIcon({
+  className: "custom-dot-icon",
+  html: `<div class="w-3 h-3 bg-blue-600 rounded-full border border-white shadow"></div>`,
+  iconSize: [22, 22],
+  iconAnchor: [6, 6], // center the icon
+});
+const reddotIcon = L.divIcon({
+  className: "custom-dot-icon",
+  html: `<div class="w-3 h-3 bg-red-600 rounded-full animate-ping border border-white shadow"></div>`,
+  iconSize: [22, 22],
+  iconAnchor: [6, 6], // center the icon
+});
 type City = "Chennai" | "Delhi" | "Bangalore";
 
 const SmartDrainDashboard: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<City>("Chennai");
 
   const cityData: Record<City, CityData> = {
-    Chennai: { drainCovers: 250, alertsToday: 12, riskZones: 6, avgBlockageRisk: "Medium" },
+    Chennai: { drainCovers: 13, alertsToday: 2, riskZones: 2, avgBlockageRisk: "Medium" },
     Delhi: { drainCovers: 180, alertsToday: 8, riskZones: 4, avgBlockageRisk: "Low" },
     Bangalore: { drainCovers: 220, alertsToday: 15, riskZones: 7, avgBlockageRisk: "High" },
   };
 
   const alerts: Alert[] = [
-    { location: "Bandra Drain", risk: "High", time: "2h ago" },
-    { location: "Andheri Drainage", risk: "Medium", time: "4h ago" },
-    { location: "Powai Lake Outlet", risk: "Low", time: "6h ago" },
+    { location: "Drain Node 1", risk: "High", time: "2h ago" },
+    { location: "Drain Node 2 Drainage", risk: "High", time: "4h ago" },
+    { location: "System Check", risk: "Low", time: "6h ago" },
   ];
 
   const currentCityData: CityData = cityData[selectedCity];
@@ -105,7 +119,7 @@ const SmartDrainDashboard: React.FC = () => {
           <div className="col-span-2 bg-gray-100 rounded-lg p-6">
             <MapContainer
               center={currentCityCoordinates}
-              zoom={12}
+              zoom={13}
               style={{ height: "400px", width: "100%" }}
               className="rounded-lg"
             >
@@ -115,9 +129,39 @@ const SmartDrainDashboard: React.FC = () => {
               />
 
               {/* City Marker */}
-              <Marker position={currentCityCoordinates}>
-                <Popup>{selectedCity}</Popup>
-              </Marker>
+              <Marker position={currentCityCoordinates} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>
+<Marker position={[13.080610, 80.264592]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>  <Marker position={[13.078228, 80.245237]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>  <Marker position={[13.081990, 80.275793]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>  <Marker position={[13.075591, 80.232137]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>  <Marker position={[13.07479712378701, 80.21958314055014]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>  <Marker position={[13.06991034594924, 80.24221626068056]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>  <Marker position={[13.064109282909248, 80.24347147654086]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker>
+
+<Marker position={[13.084564172989587, 80.25858365114283]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker> <Marker position={[13.092899349671416, 80.2588264169999]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker> <Marker position={[13.074840410968916, 80.24051278496829]} icon={reddotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker> <Marker position={[13.06251302076438, 80.24498876315954]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker> <Marker position={[13.058256271099642, 80.24826610208775]} icon={dotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker> <Marker position={[13.082088608824678, 80.2334766898264]} icon={reddotIcon}>
+  <Popup>{selectedCity}</Popup>
+</Marker> 
+    
             </MapContainer>
           </div>
 
